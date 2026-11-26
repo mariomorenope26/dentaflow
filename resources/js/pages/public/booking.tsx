@@ -221,25 +221,33 @@ export default function PublicBooking({
                                 </div>
 
                                 <div>
-                                    <Label>Odontólogo *</Label>
+                                    <Label>Odontólogo / Especialista *</Label>
                                     <select
                                         value={form.data.dentist_id}
+                                        disabled={dentists.length === 0}
                                         onChange={(e) =>
                                             form.setData(
                                                 'dentist_id',
                                                 e.target.value,
                                             )
                                         }
-                                        className="mt-1 h-10 w-full rounded-md border bg-background px-3 text-sm"
+                                        className="mt-1 h-10 w-full rounded-md border bg-background px-3 text-sm disabled:opacity-60"
                                     >
-                                        {dentists.map((d) => (
-                                            <option key={d.id} value={d.id}>
-                                                {d.name}
-                                                {d.specialty
-                                                    ? ` · ${d.specialty}`
-                                                    : ''}
+                                        {dentists.length === 0 ? (
+                                            <option value="">
+                                                Sin odontólogos activos para
+                                                reserva web
                                             </option>
-                                        ))}
+                                        ) : (
+                                            dentists.map((d) => (
+                                                <option key={d.id} value={d.id}>
+                                                    {d.name}
+                                                    {d.specialty
+                                                        ? ` · ${d.specialty}`
+                                                        : ''}
+                                                </option>
+                                            ))
+                                        )}
                                     </select>
                                 </div>
 
@@ -261,7 +269,12 @@ export default function PublicBooking({
                                         <Clock className="size-3.5 text-[#0E8FA3]" />
                                         Horarios disponibles *
                                     </Label>
-                                    {loadingSlots ? (
+                                    {dentists.length === 0 ? (
+                                        <div className="mt-2 text-xs text-muted-foreground">
+                                            No hay profesionales de odontología
+                                            habilitados actualmente.
+                                        </div>
+                                    ) : loadingSlots ? (
                                         <div className="mt-2 text-xs text-muted-foreground">
                                             Consultando disponibilidad...
                                         </div>

@@ -267,7 +267,7 @@ class UserManualCatalog
                 'category' => 'Inteligencia Artificial y Captación',
                 'roles' => ['Administrador', 'Odontólogo', 'Asistente', 'Contador (lectura)'],
                 'summary' => 'Embudo comercial y de fidelización para pacientes (desde nuevo contacto hasta mantenimiento preventivo de 6 meses y reactivación), asistente IA para redactar WhatsApp y portal público de autogestión de citas 24/7.',
-                'tip' => 'Desde CRM y Retención o Agenda puedes copiar el enlace /reservar-cita con Copiar link Reserva Online 24/7; el portal consulta disponibilidad real de horarios y asigna sillón libre automáticamente.',
+                'tip' => 'Desde CRM y Retención o Agenda puedes copiar el enlace /reservar-cita con Copiar link Reserva Online 24/7; el portal lista exclusivamente al personal activo con rol Odontólogo (excluyendo administradores y personal administrativo) y asigna sillón libre automáticamente.',
                 'steps' => [
                     'Accede a CRM y Retención para visualizar el tablero por etapas: Nuevo contacto, Presupuesto pendiente, En tratamiento, Mantenimiento 6m y Reactivación.',
                     'Cambia la Etapa CRM de cualquier paciente directamente desde la tabla según el avance de su presupuesto o control semestral.',

@@ -12,6 +12,7 @@ use App\Models\Patient;
 use App\Models\TreatmentCatalog;
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -22,6 +23,19 @@ use Inertia\Response;
 
 class PublicBookingController extends Controller
 {
+    /**
+     * Solo el personal odontológico/médico activo puede recibir reservas desde el portal web público.
+     *
+     * @return Builder<User>
+     */
+    private function bookableDentistsQuery(int $clinicId): Builder
+    {
+        return User::query()
+            ->where('clinic_id', $clinicId)
+            ->where('is_active', true)
+            ->where('role', UserRole::Odontologo);
+    }
+
     public function show(): Response
     {
         $clinic = Clinic::current();
@@ -29,10 +43,7 @@ class PublicBookingController extends Controller
             abort(404);
         }
 
-        $dentists = User::query()
-            ->where('clinic_id', $clinic->id)
-            ->where('is_active', true)
-            ->whereIn('role', [UserRole::AdminConsultorio, UserRole::Odontologo])
+        $dentists = $this->bookableDentistsQuery($clinic->id)
             ->orderBy('name')
             ->get(['id', 'name', 'specialty', 'license_number']);
 
@@ -72,10 +83,7 @@ class PublicBookingController extends Controller
             'duration' => ['nullable', 'integer', 'min:15', 'max:120'],
         ]);
 
-        $dentist = User::query()
-            ->where('clinic_id', $clinic->id)
-            ->where('is_active', true)
-            ->whereIn('role', [UserRole::AdminConsultorio, UserRole::Odontologo])
+        $dentist = $this->bookableDentistsQuery($clinic->id)
             ->findOrFail((int) $validated['dentist_id']);
 
         $date = CarbonImmutable::parse((string) $validated['date']);
@@ -139,10 +147,7 @@ class PublicBookingController extends Controller
             'reason' => ['nullable', 'string', 'max:500'],
         ]);
 
-        $dentist = User::query()
-            ->where('clinic_id', $clinic->id)
-            ->where('is_active', true)
-            ->whereIn('role', [UserRole::AdminConsultorio, UserRole::Odontologo])
+        $dentist = $this->bookableDentistsQuery($clinic->id)
             ->findOrFail((int) $validated['dentist_id']);
 
         $startsAt = CarbonImmutable::parse("{$validated['date']} {$validated['start_time']}");

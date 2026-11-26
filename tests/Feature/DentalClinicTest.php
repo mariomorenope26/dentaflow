@@ -1174,12 +1174,37 @@ test('funciones ia y crm inspiradas en dentalink y doctocliq funcionan de extrem
     ])->assertOk()
         ->assertJsonStructure(['provider', 'message', 'whatsapp_url']);
 
-    // 7. Reserva Online 24/7 Pública (sin login)
+    // 7. Reserva Online 24/7 Pública (sin login) — solo personal Odontólogo activo
+    $dentist = User::factory()->forClinic($clinic, UserRole::Odontologo)->create([
+        'name' => 'Dra. Valeria Vega',
+        'specialty' => 'Endodoncia',
+        'is_active' => true,
+    ]);
+    $inactiveDentist = User::factory()->forClinic($clinic, UserRole::Odontologo)->create([
+        'name' => 'Dr. Inactivo',
+        'is_active' => false,
+    ]);
+    $assistant = User::factory()->forClinic($clinic, UserRole::Asistente)->create();
+    $accountant = User::factory()->forClinic($clinic, UserRole::Contador)->create();
+
     $this->post('/logout');
-    $this->get('/reservar-cita')->assertOk();
+    $this->get('/reservar-cita')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('public/booking')
+            ->has('dentists', 1)
+            ->where('dentists.0.id', $dentist->id),
+        );
 
     $futureDate = Carbon::tomorrow()->toDateString();
-    $slotsRes = $this->getJson("/reservar-cita/disponibilidad?dentist_id={$admin->id}&date={$futureDate}&duration=30")
+
+    // No permite consultar disponibilidad ni reservar para administrador, asistente, contador ni odontólogo inactivo
+    $this->getJson("/reservar-cita/disponibilidad?dentist_id={$admin->id}&date={$futureDate}&duration=30")->assertNotFound();
+    $this->getJson("/reservar-cita/disponibilidad?dentist_id={$assistant->id}&date={$futureDate}&duration=30")->assertNotFound();
+    $this->getJson("/reservar-cita/disponibilidad?dentist_id={$accountant->id}&date={$futureDate}&duration=30")->assertNotFound();
+    $this->getJson("/reservar-cita/disponibilidad?dentist_id={$inactiveDentist->id}&date={$futureDate}&duration=30")->assertNotFound();
+
+    $slotsRes = $this->getJson("/reservar-cita/disponibilidad?dentist_id={$dentist->id}&date={$futureDate}&duration=30")
         ->assertOk();
     $firstSlot = $slotsRes->json('slots.0.start');
     expect($firstSlot)->not->toBeNull();
@@ -1194,9 +1219,22 @@ test('funciones ia y crm inspiradas en dentalink y doctocliq funcionan de extrem
         'last_name' => 'Vargas',
         'document_number' => '71234567',
         'phone' => '999888777',
+    ])->assertNotFound();
+
+    $this->post('/reservar-cita', [
+        'dentist_id' => $dentist->id,
+        'service_title' => 'Evaluación Integral',
+        'date' => $futureDate,
+        'start_time' => $firstSlot,
+        'duration' => 30,
+        'first_name' => 'Diego',
+        'last_name' => 'Vargas',
+        'document_number' => '71234567',
+        'phone' => '999888777',
     ])->assertRedirect();
 
     $onlineAppt = Appointment::withoutGlobalScopes()->latest('id')->firstOrFail();
     expect($onlineAppt->title)->toBe('Evaluación Integral');
+    expect($onlineAppt->dentist_id)->toBe($dentist->id);
     expect($onlineAppt->status)->toBe(AppointmentStatus::Reservada);
 });
