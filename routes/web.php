@@ -27,6 +27,7 @@ use App\Http\Controllers\SterilizationInventoryController;
 use App\Http\Controllers\SystemBackupController;
 use App\Http\Controllers\TreatmentCatalogController;
 use App\Http\Controllers\TreatmentPlanController;
+use App\Http\Controllers\UserManualController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
@@ -179,6 +180,10 @@ Route::middleware(['auth', 'verified', 'clinic'])->group(function (): void {
     // Reportes clínicos y financieros
     Route::get('reportes', [ReportController::class, 'index'])->name('reports.index');
     Route::get('reportes/export-csv', [ReportController::class, 'exportCsv'])->name('reports.export-csv');
+
+    // Manual de usuario en línea y PDF oficial (solo personal autenticado)
+    Route::get('manual', [UserManualController::class, 'index'])->name('manual.index');
+    Route::get('manual/pdf', [UserManualController::class, 'pdf'])->name('manual.pdf');
 
     // Configuración del consultorio, impresiones, integraciones, equipo, respaldo y auditoría
     Route::get('clinic/settings', [ClinicSettingsController::class, 'edit'])->name('clinic.settings');

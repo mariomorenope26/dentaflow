@@ -1,6 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import {
     BarChart3,
+    BookOpen,
     CalendarDays,
     ClipboardList,
     FileSpreadsheet,
@@ -93,6 +94,11 @@ export function AppSidebar() {
                   },
               ]
             : []),
+        {
+            title: 'Manual de uso',
+            href: '/manual',
+            icon: BookOpen,
+        },
     ];
 
     return (

@@ -1049,3 +1049,28 @@ test('homologacion HCE internacional exporta HL7 FHIR R4, notas SOAP con hash SH
 
     expect($img->fresh()?->annotations['calibration_mm_per_px'])->toBe(0.05);
 });
+
+test('manual oficial en linea y descarga pdf requieren sesion iniciada e incluyen capturas reales', function () {
+    $this->get('/manual')->assertRedirect(route('login'));
+    $this->get('/manual/pdf')->assertRedirect(route('login'));
+
+    $clinic = ClinicProvisioner::createClinicWithDefaults([
+        'name' => 'Clínica Manual',
+    ]);
+    $dentist = User::factory()->forClinic($clinic, UserRole::Odontologo)->create();
+
+    $this->actingAs($dentist);
+
+    $this->get('/manual')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('manual/index')
+            ->has('chapters', 12)
+            ->has('roleMatrix', 10)
+            ->where('pdfUrl', route('manual.pdf')),
+        );
+
+    $pdf = $this->get('/manual/pdf')->assertOk();
+    expect(substr((string) $pdf->getContent(), 0, 5))->toBe('%PDF-');
+    expect(strlen((string) $pdf->getContent()))->toBeGreaterThan(50000);
+});

@@ -157,7 +157,7 @@ export function RadiographViewerModal({
 
     return (
         <Dialog open onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="max-h-[95vh] max-w-5xl overflow-y-auto bg-slate-950 text-slate-100">
+            <DialogContent className="max-h-[95vh] max-w-[95vw] overflow-y-auto bg-slate-950 text-slate-100 sm:max-w-5xl">
                 <DialogHeader>
                     <DialogTitle className="flex items-center justify-between text-slate-100">
                         <span>
