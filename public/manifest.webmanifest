@@ -1,0 +1,26 @@
+{
+    "name": "DentaFlow · Historias Clínicas Odontológicas",
+    "short_name": "DentaFlow",
+    "description": "Plataforma clínica dental con odontograma interactivo, historias clínicas y agenda offline.",
+    "start_url": "/dashboard",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "any",
+    "background_color": "#F6FAFB",
+    "theme_color": "#0E8FA3",
+    "lang": "es-PE",
+    "icons": [
+        {
+            "src": "/icons/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icons/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}

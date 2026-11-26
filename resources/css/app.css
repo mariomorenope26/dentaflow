@@ -1,0 +1,151 @@
+@import 'tailwindcss';
+
+@import 'tw-animate-css';
+
+@source '../views';
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+    --font-sans:
+        'Inter', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
+        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+        'Noto Color Emoji';
+
+    --radius-lg: var(--radius);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-sm: calc(var(--radius) - 4px);
+
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+
+    --color-clinical-primary: #0e8fa3;
+    --color-clinical-dark: #0a6577;
+    --color-clinical-mint: #5cc2a7;
+    --color-clinical-success: #2e9e6b;
+    --color-clinical-warning: #f0a92e;
+    --color-clinical-danger: #d64545;
+    --color-clinical-info: #2f7fd1;
+
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+    --background: #f6fafb;
+    --foreground: #1f2d3a;
+    --card: #ffffff;
+    --card-foreground: #1f2d3a;
+    --popover: #ffffff;
+    --popover-foreground: #1f2d3a;
+    --primary: #0e8fa3;
+    --primary-foreground: #ffffff;
+    --secondary: #e6f5f7;
+    --secondary-foreground: #0a6577;
+    --muted: #edf4f6;
+    --muted-foreground: #5f6f7c;
+    --accent: #e3f6f1;
+    --accent-foreground: #0a6577;
+    --destructive: #d64545;
+    --destructive-foreground: #ffffff;
+    --border: #dce6ea;
+    --input: #dce6ea;
+    --ring: #0e8fa3;
+    --chart-1: #0e8fa3;
+    --chart-2: #5cc2a7;
+    --chart-3: #2f7fd1;
+    --chart-4: #f0a92e;
+    --chart-5: #d64545;
+    --radius: 0.75rem;
+    --sidebar: #ffffff;
+    --sidebar-foreground: #1f2d3a;
+    --sidebar-primary: #0e8fa3;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #e6f5f7;
+    --sidebar-accent-foreground: #0a6577;
+    --sidebar-border: #dce6ea;
+    --sidebar-ring: #0e8fa3;
+}
+
+.dark {
+    --background: #0e171f;
+    --foreground: #e7f1f5;
+    --card: #15222d;
+    --card-foreground: #e7f1f5;
+    --popover: #15222d;
+    --popover-foreground: #e7f1f5;
+    --primary: #1ba3b8;
+    --primary-foreground: #ffffff;
+    --secondary: #1c313f;
+    --secondary-foreground: #8de0ec;
+    --muted: #1a2a37;
+    --muted-foreground: #96aab8;
+    --accent: #18363b;
+    --accent-foreground: #7be0c8;
+    --destructive: #e05a5a;
+    --destructive-foreground: #ffffff;
+    --border: #253746;
+    --input: #253746;
+    --ring: #1ba3b8;
+    --chart-1: #1ba3b8;
+    --chart-2: #5cc2a7;
+    --chart-3: #4e97e3;
+    --chart-4: #f3b94e;
+    --chart-5: #e05a5a;
+    --sidebar: #121e28;
+    --sidebar-foreground: #e7f1f5;
+    --sidebar-primary: #1ba3b8;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #1b303d;
+    --sidebar-accent-foreground: #8de0ec;
+    --sidebar-border: #253746;
+    --sidebar-ring: #1ba3b8;
+}
+
+@layer base {
+    * {
+        @apply border-border outline-ring/50;
+    }
+
+    body {
+        @apply bg-background text-foreground;
+    }
+}
