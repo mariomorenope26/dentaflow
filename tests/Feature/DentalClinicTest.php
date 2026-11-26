@@ -1065,12 +1065,111 @@ test('manual oficial en linea y descarga pdf requieren sesion iniciada e incluye
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->component('manual/index')
-            ->has('chapters', 12)
-            ->has('roleMatrix', 10)
+            ->has('chapters', 13)
+            ->has('roleMatrix', 12)
             ->where('pdfUrl', route('manual.pdf')),
         );
 
     $pdf = $this->get('/manual/pdf')->assertOk();
     expect(substr((string) $pdf->getContent(), 0, 5))->toBe('%PDF-');
     expect(strlen((string) $pdf->getContent()))->toBeGreaterThan(50000);
+});
+
+test('funciones ia y crm inspiradas en dentalink y doctocliq funcionan de extremo a extremo', function () {
+    $clinic = ClinicProvisioner::createClinicWithDefaults([
+        'name' => 'Clínica IA Dental',
+    ]);
+    $admin = User::factory()->forClinic($clinic, UserRole::AdminConsultorio)->create();
+    $patient = Patient::withoutGlobalScopes()->create([
+        'clinic_id' => $clinic->id,
+        'history_number' => 'HC-0001',
+        'first_name' => 'Sofía',
+        'last_name' => 'Mendoza',
+        'document_type' => 'DNI',
+        'document_number' => '45678123',
+        'phone' => '987654321',
+        'created_by' => $admin->id,
+    ]);
+
+    $this->actingAs($admin);
+
+    // 1. Resumen Clínico IA Pre-Consulta
+    $this->postJson("/patients/{$patient->id}/ai-clinical-summary")
+        ->assertOk()
+        ->assertJsonStructure(['provider', 'risk_level', 'headline', 'bullets', 'recommended_next_step']);
+
+    // 2. Copiloto SOAP por Voz -> Estructura SOAP + CIE-10
+    $this->postJson("/patients/{$patient->id}/ai-parse-soap", [
+        'transcript' => 'Paciente refiere dolor al frío en pieza 46. Al examen clínico caries dentinaria profunda sin fístula. Diagnóstico pulpitis reversible. Se realizó protección pulpar indirecta con ionómero.',
+    ])->assertOk()
+        ->assertJsonPath('cie10_code', 'K04.0');
+
+    // 3. Análisis Diagnóstico IA en Visor Radiográfico
+    Storage::fake('local');
+    $this->post("/patients/{$patient->id}/images", [
+        'category' => 'radiografia',
+        'title' => 'Rx 46',
+        'tooth_code' => '46',
+        'taken_at' => now()->toDateString(),
+        'image' => UploadedFile::fake()->image('rx46.jpg', 400, 400),
+    ])->assertRedirect();
+    $img = PatientImage::withoutGlobalScopes()->firstOrFail();
+
+    $this->postJson("/patients/{$patient->id}/images/{$img->id}/ai-analyze")
+        ->assertOk()
+        ->assertJsonStructure(['provider', 'summary', 'disclaimer', 'findings']);
+    expect($img->fresh()?->ai_analysis)->not->toBeNull();
+
+    // 4. Contralor IA
+    $this->get('/contralor-ia')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('contralor/index')
+            ->has('audit.issues'),
+        );
+
+    // 5. Reportes Conversacionales IA
+    $this->postJson('/reportes/ai-ask', [
+        'question' => '¿Cuánto recaudamos este mes y por qué medio de pago?',
+    ])->assertOk()
+        ->assertJsonStructure(['provider', 'answer', 'highlights']);
+
+    // 6. CRM Odontológico y Redacción WhatsApp IA
+    $this->get('/crm')->assertOk();
+    $this->patch("/crm/patients/{$patient->id}", [
+        'crm_stage' => 'presupuesto_pendiente',
+        'crm_notes' => 'Enviar facilidades en cuotas.',
+    ])->assertRedirect();
+    expect($patient->fresh()?->crm_stage)->toBe('presupuesto_pendiente');
+
+    $this->postJson("/crm/patients/{$patient->id}/whatsapp-draft", [
+        'campaign_type' => 'presupuesto',
+    ])->assertOk()
+        ->assertJsonStructure(['provider', 'message', 'whatsapp_url']);
+
+    // 7. Reserva Online 24/7 Pública (sin login)
+    $this->post('/logout');
+    $this->get('/reservar-cita')->assertOk();
+
+    $futureDate = Carbon::tomorrow()->toDateString();
+    $slotsRes = $this->getJson("/reservar-cita/disponibilidad?dentist_id={$admin->id}&date={$futureDate}&duration=30")
+        ->assertOk();
+    $firstSlot = $slotsRes->json('slots.0.start');
+    expect($firstSlot)->not->toBeNull();
+
+    $this->post('/reservar-cita', [
+        'dentist_id' => $admin->id,
+        'service_title' => 'Evaluación Integral',
+        'date' => $futureDate,
+        'start_time' => $firstSlot,
+        'duration' => 30,
+        'first_name' => 'Diego',
+        'last_name' => 'Vargas',
+        'document_number' => '71234567',
+        'phone' => '999888777',
+    ])->assertRedirect();
+
+    $onlineAppt = Appointment::withoutGlobalScopes()->latest('id')->firstOrFail();
+    expect($onlineAppt->title)->toBe('Evaluación Integral');
+    expect($onlineAppt->status)->toBe(AppointmentStatus::Reservada);
 });

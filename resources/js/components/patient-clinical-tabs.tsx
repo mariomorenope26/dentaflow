@@ -7,6 +7,8 @@ import {
     FileCheck2,
     Lock,
     MessageSquarePlus,
+    Mic,
+    MicOff,
     Plus,
     Save,
     Sparkles,
@@ -1265,6 +1267,61 @@ export function MedicalHistoryTab({
                         onSubmit={(e) => void submitEvolution(e)}
                         className="space-y-3"
                     >
+                        {!correctionTarget && (
+                            <SoapAiCopilot
+                                patientId={patient.id}
+                                onApply={(parsed) => {
+                                    if (parsed.procedure_summary) {
+                                        evolForm.setData(
+                                            'procedure_summary',
+                                            parsed.procedure_summary,
+                                        );
+                                    }
+                                    if (parsed.clinical_notes) {
+                                        evolForm.setData(
+                                            'clinical_notes',
+                                            parsed.clinical_notes,
+                                        );
+                                    }
+                                    if (parsed.soap_subjective) {
+                                        evolForm.setData(
+                                            'soap_subjective',
+                                            parsed.soap_subjective,
+                                        );
+                                    }
+                                    if (parsed.soap_objective) {
+                                        evolForm.setData(
+                                            'soap_objective',
+                                            parsed.soap_objective,
+                                        );
+                                    }
+                                    if (parsed.soap_assessment) {
+                                        evolForm.setData(
+                                            'soap_assessment',
+                                            parsed.soap_assessment,
+                                        );
+                                    }
+                                    if (parsed.soap_plan) {
+                                        evolForm.setData(
+                                            'soap_plan',
+                                            parsed.soap_plan,
+                                        );
+                                    }
+                                    if (parsed.prescription_notes) {
+                                        evolForm.setData(
+                                            'prescription_notes',
+                                            parsed.prescription_notes,
+                                        );
+                                    }
+                                    if (parsed.cie10_code) {
+                                        evolForm.setData(
+                                            'cie10_code',
+                                            parsed.cie10_code,
+                                        );
+                                    }
+                                }}
+                            />
+                        )}
                         {correctionTarget && (
                             <div>
                                 <Label>Motivo de corrección *</Label>
@@ -2136,5 +2193,158 @@ export function QuickAppointmentModal({
                 </form>
             </DialogContent>
         </Dialog>
+    );
+}
+
+type ParsedSoap = {
+    procedure_summary: string;
+    clinical_notes: string;
+    soap_subjective: string;
+    soap_objective: string;
+    soap_assessment: string;
+    soap_plan: string;
+    prescription_notes: string;
+    cie10_code: string;
+};
+
+function SoapAiCopilot({
+    patientId,
+    onApply,
+}: {
+    patientId: number;
+    onApply: (data: ParsedSoap) => void;
+}) {
+    const [transcript, setTranscript] = useState('');
+    const [listening, setListening] = useState(false);
+    const [loading, setLoading] = useState(false);
+
+    const startVoiceDictation = () => {
+        const win = window as unknown as {
+            SpeechRecognition?: new () => {
+                lang: string;
+                interimResults: boolean;
+                onresult: (e: {
+                    results: ArrayLike<ArrayLike<{ transcript: string }>>;
+                }) => void;
+                onerror: () => void;
+                onend: () => void;
+                start: () => void;
+            };
+            webkitSpeechRecognition?: new () => {
+                lang: string;
+                interimResults: boolean;
+                onresult: (e: {
+                    results: ArrayLike<ArrayLike<{ transcript: string }>>;
+                }) => void;
+                onerror: () => void;
+                onend: () => void;
+                start: () => void;
+            };
+        };
+
+        const SpeechCtor = win.SpeechRecognition ?? win.webkitSpeechRecognition;
+        if (!SpeechCtor) {
+            toast.error(
+                'El dictado por micrófono requiere Chrome/Edge; también puedes escribir o pegar el dictado aquí.',
+            );
+            return;
+        }
+
+        const recognition = new SpeechCtor();
+        recognition.lang = 'es-PE';
+        recognition.interimResults = false;
+        setListening(true);
+        recognition.onresult = (event) => {
+            const spoken = event.results[0]?.[0]?.transcript ?? '';
+            if (spoken) {
+                setTranscript((prev) =>
+                    prev ? `${prev.trim()} ${spoken}` : spoken,
+                );
+            }
+        };
+        recognition.onerror = () => setListening(false);
+        recognition.onend = () => setListening(false);
+        recognition.start();
+    };
+
+    const structureWithAi = async () => {
+        if (transcript.trim().length < 8) {
+            toast.error(
+                'Escribe o dicta al menos una frase clínica para estructurarla en SOAP.',
+            );
+            return;
+        }
+        setLoading(true);
+        try {
+            const xsrf = decodeURIComponent(
+                document.cookie.match(/XSRF-TOKEN=([^;]+)/)?.[1] ?? '',
+            );
+            const res = await fetch(`/patients/${patientId}/ai-parse-soap`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                    'X-XSRF-TOKEN': xsrf,
+                },
+                body: JSON.stringify({ transcript }),
+            });
+            const body = await res.json();
+            if (!res.ok) {
+                toast.error(
+                    body.message ?? 'No se pudo estructurar el dictado.',
+                );
+                return;
+            }
+            onApply(body);
+            toast.success('Nota clínica estructurada en SOAP + CIE-10.');
+        } catch {
+            toast.error('Error al procesar con el Copiloto SOAP.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="space-y-2 rounded-xl border border-[#0E8FA3]/30 bg-[#F0FAFC] p-3 dark:bg-cyan-950/25">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="flex items-center gap-1.5 text-xs font-bold text-[#062E39] dark:text-cyan-200">
+                    <Sparkles className="size-3.5 text-[#0E8FA3]" />
+                    Copiloto Clínico IA (Dictado por Voz &rarr; SOAP + CIE-10)
+                </span>
+                <div className="flex items-center gap-1.5">
+                    <Button
+                        type="button"
+                        size="sm"
+                        variant={listening ? 'destructive' : 'outline'}
+                        onClick={startVoiceDictation}
+                        className="h-7 gap-1 px-2.5 text-[11px]"
+                    >
+                        {listening ? (
+                            <MicOff className="size-3" />
+                        ) : (
+                            <Mic className="size-3 text-[#0E8FA3]" />
+                        )}
+                        {listening ? 'Escuchando...' : 'Dictar voz'}
+                    </Button>
+                    <Button
+                        type="button"
+                        size="sm"
+                        disabled={loading}
+                        onClick={() => void structureWithAi()}
+                        className="h-7 gap-1 bg-[#0E8FA3] px-2.5 text-[11px] text-white hover:bg-[#0A6577]"
+                    >
+                        <Sparkles className="size-3" />
+                        {loading ? 'Procesando...' : 'Estructurar SOAP'}
+                    </Button>
+                </div>
+            </div>
+            <textarea
+                rows={2}
+                value={transcript}
+                onChange={(e) => setTranscript(e.target.value)}
+                placeholder="Ej. Paciente refiere dolor agudo al frío en pieza 46, al examen caries dentinaria profunda sin fístula, diagnóstico pulpitis reversible, se realizó protección pulpar con ionómero y resina A2..."
+                className="w-full rounded-lg border bg-background p-2 text-xs"
+            />
+        </div>
     );
 }

@@ -56,6 +56,10 @@ class ClinicSettingsController extends Controller
         $maskedToken = is_string($token) && $token !== ''
             ? '••••••••'.mb_substr($token, -6)
             : null;
+        $aiKey = $clinic->ai_api_key;
+        $maskedAiKey = is_string($aiKey) && $aiKey !== ''
+            ? '••••••••'.mb_substr($aiKey, -6)
+            : null;
 
         return Inertia::render('clinic/settings', [
             'clinic' => [
@@ -74,6 +78,10 @@ class ClinicSettingsController extends Controller
                 'auto_lock_minutes' => $clinic->autoLockMinutes(),
                 'has_apiperu_token' => is_string($token) && $token !== '',
                 'apiperu_token_masked' => $maskedToken,
+                'ai_provider' => $clinic->ai_provider ?: 'local',
+                'has_ai_api_key' => is_string($aiKey) && $aiKey !== '',
+                'ai_api_key_masked' => $maskedAiKey,
+                'online_booking_enabled' => $clinic->online_booking_enabled,
                 'print_settings' => $clinic->resolvedPrintSettings(),
             ],
             'members' => $members,
@@ -116,6 +124,10 @@ class ClinicSettingsController extends Controller
             'remove_logo' => ['nullable', 'boolean'],
             'apiperu_token' => ['nullable', 'string', 'max:255'],
             'clear_apiperu_token' => ['nullable', 'boolean'],
+            'ai_provider' => ['nullable', 'string', 'in:local,gemini,openai'],
+            'ai_api_key' => ['nullable', 'string', 'max:255'],
+            'clear_ai_api_key' => ['nullable', 'boolean'],
+            'online_booking_enabled' => ['nullable', 'boolean'],
             'print_settings' => ['nullable', 'array'],
             'print_settings.paper_size' => ['nullable', 'string', 'in:a4,letter'],
             'print_settings.thermal_width' => ['nullable', 'string', 'in:80mm,58mm'],
@@ -147,6 +159,18 @@ class ClinicSettingsController extends Controller
             $apiperuToken = trim((string) $validated['apiperu_token']);
         }
 
+        $aiApiKey = $clinic->ai_api_key;
+        if (! empty($validated['clear_ai_api_key'])) {
+            $aiApiKey = null;
+        } elseif (! empty($validated['ai_api_key'])) {
+            $aiApiKey = trim((string) $validated['ai_api_key']);
+        }
+
+        $aiProvider = $validated['ai_provider'] ?? $clinic->ai_provider ?? 'local';
+        $onlineBooking = array_key_exists('online_booking_enabled', $validated)
+            ? (bool) $validated['online_booking_enabled']
+            : $clinic->online_booking_enabled;
+
         $currentPrint = $clinic->resolvedPrintSettings();
         /** @var array<string, mixed> $incomingPrint */
         $incomingPrint = is_array($validated['print_settings'] ?? null) ? $validated['print_settings'] : [];
@@ -172,6 +196,9 @@ class ClinicSettingsController extends Controller
             'currency_symbol' => $validated['currency_symbol'],
             'chairs' => array_values($validated['chairs']),
             'apiperu_token' => $apiperuToken,
+            'ai_provider' => $aiProvider,
+            'ai_api_key' => $aiApiKey,
+            'online_booking_enabled' => $onlineBooking,
             'print_settings' => $mergedPrint,
             'settings' => [
                 ...($clinic->settings ?? []),

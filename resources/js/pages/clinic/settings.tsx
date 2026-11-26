@@ -68,6 +68,10 @@ type Props = {
         auto_lock_minutes: number;
         has_apiperu_token: boolean;
         apiperu_token_masked: string | null;
+        ai_provider?: 'local' | 'gemini' | 'openai';
+        has_ai_api_key?: boolean;
+        ai_api_key_masked?: string | null;
+        online_booking_enabled?: boolean;
         print_settings: PrintSettings;
     };
     members: Member[];
@@ -140,10 +144,18 @@ export default function ClinicSettings({
         clinic.print_settings,
     );
 
-    // apiperu.dev token + prueba en vivo
+    // apiperu.dev token + prueba en vivo + IA + Reserva Online
     const [apiperuToken, setApiperuToken] = useState('');
     const [showToken, setShowToken] = useState(false);
     const [clearApiperuToken, setClearApiperuToken] = useState(false);
+    const [aiProvider, setAiProvider] = useState<'local' | 'gemini' | 'openai'>(
+        clinic.ai_provider ?? 'local',
+    );
+    const [aiApiKey, setAiApiKey] = useState('');
+    const [clearAiApiKey, setClearAiApiKey] = useState(false);
+    const [onlineBookingEnabled, setOnlineBookingEnabled] = useState<boolean>(
+        clinic.online_booking_enabled ?? true,
+    );
     const [savingSettings, setSavingSettings] = useState(false);
 
     const [testDni, setTestDni] = useState('');
@@ -227,6 +239,9 @@ export default function ClinicSettings({
             auto_lock_minutes: autoLockMinutes,
             remove_logo: removeLogo ? 1 : 0,
             clear_apiperu_token: clearApiperuToken ? 1 : 0,
+            ai_provider: aiProvider,
+            clear_ai_api_key: clearAiApiKey ? 1 : 0,
+            online_booking_enabled: onlineBookingEnabled ? 1 : 0,
             print_settings: {
                 paper_size: printSettings.paper_size,
                 thermal_width: printSettings.thermal_width,
@@ -243,6 +258,9 @@ export default function ClinicSettings({
         if (apiperuToken.trim() !== '') {
             payload.apiperu_token = apiperuToken.trim();
         }
+        if (aiApiKey.trim() !== '') {
+            payload.ai_api_key = aiApiKey.trim();
+        }
 
         router.post('/clinic/settings', payload as never, {
             forceFormData: true,
@@ -253,6 +271,8 @@ export default function ClinicSettings({
                 setRemoveLogo(false);
                 setApiperuToken('');
                 setClearApiperuToken(false);
+                setAiApiKey('');
+                setClearAiApiKey(false);
             },
         });
     };
@@ -1007,6 +1027,122 @@ export default function ClinicSettings({
                                 </div>
                             )}
                         </div>
+
+                        {/* Motor de Inteligencia Artificial y Reserva Online 24/7 */}
+                        <form
+                            onSubmit={saveAllSettings}
+                            className="space-y-4 rounded-2xl border bg-card p-5 shadow-xs"
+                        >
+                            <div className="flex flex-wrap items-center justify-between gap-2 border-b pb-3">
+                                <div>
+                                    <h2 className="text-base font-bold">
+                                        Inteligencia Artificial Clínica y
+                                        Reserva Online 24/7
+                                    </h2>
+                                    <p className="text-xs text-muted-foreground">
+                                        Motor integrado local listo para usar
+                                        sin costo adicional, o conecta tu clave
+                                        opcional de Gemini / OpenAI y activa el
+                                        portal público de citas.
+                                    </p>
+                                </div>
+                                <Badge className="bg-[#E6F5F7] text-[#0A6577] hover:bg-[#E6F5F7]">
+                                    Motor activo:{' '}
+                                    {aiProvider === 'local'
+                                        ? 'IA Clínica Integrada'
+                                        : aiProvider.toUpperCase()}
+                                </Badge>
+                            </div>
+
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                <div>
+                                    <Label>Proveedor de IA Clínica</Label>
+                                    <select
+                                        value={aiProvider}
+                                        onChange={(e) =>
+                                            setAiProvider(
+                                                e.target.value as
+                                                    | 'local'
+                                                    | 'gemini'
+                                                    | 'openai',
+                                            )
+                                        }
+                                        className="mt-1 h-10 w-full rounded-md border bg-background px-3 text-sm"
+                                    >
+                                        <option value="local">
+                                            Motor Clínico IA Integrado
+                                            (Inmediato / Sin costo)
+                                        </option>
+                                        <option value="gemini">
+                                            Google Gemini API (Texto + Visión
+                                            Rx)
+                                        </option>
+                                        <option value="openai">
+                                            OpenAI GPT-4o mini
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <Label>
+                                        {clinic.has_ai_api_key
+                                            ? `Reemplazar API Key IA (${clinic.ai_api_key_masked})`
+                                            : 'API Key externa de IA (opcional)'}
+                                    </Label>
+                                    <Input
+                                        type="password"
+                                        disabled={aiProvider === 'local'}
+                                        placeholder={
+                                            aiProvider === 'local'
+                                                ? 'No requiere clave externa'
+                                                : 'Pega aquí tu API Key secreta'
+                                        }
+                                        value={aiApiKey}
+                                        onChange={(e) =>
+                                            setAiApiKey(e.target.value)
+                                        }
+                                    />
+                                </div>
+                            </div>
+
+                            {clinic.has_ai_api_key && (
+                                <label className="flex items-center gap-2 text-xs text-[#D64545]">
+                                    <input
+                                        type="checkbox"
+                                        checked={clearAiApiKey}
+                                        onChange={(e) =>
+                                            setClearAiApiKey(e.target.checked)
+                                        }
+                                    />
+                                    Eliminar clave de IA guardada
+                                </label>
+                            )}
+
+                            <label className="flex items-center gap-2 rounded-xl border bg-muted/20 p-3 text-xs font-medium">
+                                <input
+                                    type="checkbox"
+                                    checked={onlineBookingEnabled}
+                                    onChange={(e) =>
+                                        setOnlineBookingEnabled(
+                                            e.target.checked,
+                                        )
+                                    }
+                                />
+                                Habilitar portal público de Reserva de Citas
+                                Online 24/7 (/reservar-cita)
+                            </label>
+
+                            <div className="flex justify-end">
+                                <Button
+                                    type="submit"
+                                    disabled={savingSettings}
+                                    className="gap-1.5 bg-[#0E8FA3] text-white hover:bg-[#0A6577]"
+                                >
+                                    <Save className="size-4" />
+                                    Guardar configuración IA y Reserva
+                                </Button>
+                            </div>
+                        </form>
                     </div>
                 )}
 

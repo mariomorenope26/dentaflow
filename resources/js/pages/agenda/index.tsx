@@ -5,6 +5,7 @@ import {
     ChevronLeft,
     ChevronRight,
     Clock,
+    Copy,
     FlaskConical,
     GripVertical,
     MessageCircle,
@@ -343,15 +344,34 @@ export default function AgendaIndex({
                             · {range.start} al {range.end}
                         </p>
                     </div>
-                    {canManage && (
-                        <Button
-                            onClick={() => setOpenCreate(true)}
-                            className="h-11 gap-2 rounded-xl bg-[#0E8FA3] px-5 text-white hover:bg-[#0A6577]"
-                        >
-                            <Plus className="size-4" />
-                            Nueva cita
-                        </Button>
-                    )}
+                    <div className="flex flex-wrap items-center gap-2">
+                        {auth.clinic?.online_booking_enabled && (
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => {
+                                    const link = `${window.location.origin}/reservar-cita`;
+                                    void navigator.clipboard.writeText(link);
+                                    toast.success(
+                                        'Enlace público de Reserva Online 24/7 copiado.',
+                                    );
+                                }}
+                                className="h-11 gap-1.5 rounded-xl border-[#0E8FA3]/40 text-xs font-semibold text-[#0A6577]"
+                            >
+                                <Copy className="size-3.5" />
+                                Link Reserva Online 24/7
+                            </Button>
+                        )}
+                        {canManage && (
+                            <Button
+                                onClick={() => setOpenCreate(true)}
+                                className="h-11 gap-2 rounded-xl bg-[#0E8FA3] px-5 text-white hover:bg-[#0A6577]"
+                            >
+                                <Plus className="size-4" />
+                                Nueva cita
+                            </Button>
+                        )}
+                    </div>
                 </div>
 
                 {/* Filtros y vistas */}

@@ -9,6 +9,7 @@ import {
     Phone,
     Search,
     ShieldAlert,
+    Sparkles,
     Stethoscope,
     Trash2,
 } from 'lucide-react';
@@ -46,6 +47,121 @@ import type {
     TimelineEvent,
     TreatmentCatalogItem,
 } from '@/types';
+
+type AiSummary = {
+    provider: string;
+    risk_level: string;
+    headline: string;
+    bullets: { label: string; detail: string; tone: string }[];
+    recommended_next_step: string;
+};
+
+function PatientAiSummaryCard({ patientId }: { patientId: number }) {
+    const [summary, setSummary] = useState<AiSummary | null>(null);
+    const [loading, setLoading] = useState(false);
+
+    const generate = async () => {
+        setLoading(true);
+        try {
+            const xsrf = decodeURIComponent(
+                document.cookie.match(/XSRF-TOKEN=([^;]+)/)?.[1] ?? '',
+            );
+            const res = await fetch(
+                `/patients/${patientId}/ai-clinical-summary`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Accept: 'application/json',
+                        'X-XSRF-TOKEN': xsrf,
+                    },
+                },
+            );
+            const body = await res.json();
+            if (!res.ok) {
+                toast.error(body.message ?? 'No se pudo generar el resumen.');
+                return;
+            }
+            setSummary(body);
+        } catch {
+            toast.error('Error al generar resumen clínico IA.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="rounded-2xl border border-[#0E8FA3]/30 bg-gradient-to-br from-[#F0FAFC] to-white p-5 shadow-xs dark:from-cyan-950/30 dark:to-card">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                    <Sparkles className="size-4 text-[#0E8FA3]" />
+                    <h3 className="text-sm font-bold text-[#062E39] dark:text-cyan-100">
+                        Resumen Clínico IA Pre-Consulta
+                    </h3>
+                </div>
+                <Button
+                    type="button"
+                    size="sm"
+                    disabled={loading}
+                    onClick={() => void generate()}
+                    className="h-8 gap-1.5 bg-[#0E8FA3] text-xs text-white hover:bg-[#0A6577]"
+                >
+                    <Sparkles className="size-3.5" />
+                    {loading
+                        ? 'Analizando...'
+                        : summary
+                          ? 'Actualizar resumen'
+                          : 'Generar resumen IA'}
+                </Button>
+            </div>
+
+            {!summary ? (
+                <p className="mt-2 text-xs text-muted-foreground">
+                    Sintetiza en segundos alergias, riesgo ASA, hallazgos del
+                    odontograma, última evolución, saldo y laboratorio pendiente
+                    antes de iniciar la atención.
+                </p>
+            ) : (
+                <div className="mt-3 space-y-2.5 text-xs">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <Badge
+                            variant={
+                                summary.risk_level === 'alto'
+                                    ? 'destructive'
+                                    : 'secondary'
+                            }
+                            className="uppercase"
+                        >
+                            Riesgo {summary.risk_level}
+                        </Badge>
+                        <span className="font-semibold text-foreground">
+                            {summary.headline}
+                        </span>
+                    </div>
+                    <div className="space-y-1.5">
+                        {summary.bullets.map((b, i) => (
+                            <div
+                                key={i}
+                                className="rounded-xl border bg-background/80 px-3 py-2"
+                            >
+                                <div className="font-bold text-[#0A6577] dark:text-cyan-300">
+                                    {b.label}
+                                </div>
+                                <div className="text-muted-foreground">
+                                    {b.detail}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="rounded-xl border border-[#2E9E6B]/30 bg-[#E3F6F1]/60 px-3 py-2 text-[#166534] dark:bg-emerald-950/30 dark:text-emerald-200">
+                        <strong>Siguiente paso sugerido: </strong>
+                        {summary.recommended_next_step}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
 
 type Props = {
     patient: Patient;
@@ -516,6 +632,8 @@ export default function PatientShow({
                         </div>
 
                         <div className="space-y-4 lg:col-span-5">
+                            <PatientAiSummaryCard patientId={patient.id} />
+
                             <div className="rounded-2xl border bg-card p-5 shadow-xs">
                                 <h3 className="mb-3 text-base font-bold">
                                     Resumen diagnóstico

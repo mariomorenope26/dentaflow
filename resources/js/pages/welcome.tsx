@@ -81,7 +81,10 @@ const FEATURE_MODULES = [
 ];
 
 export default function Welcome() {
-    const { auth } = usePage<{ auth: Auth }>().props;
+    const { auth, onlineBookingUrl } = usePage<{
+        auth: Auth;
+        onlineBookingUrl?: string | null;
+    }>().props;
 
     const whatsappHref =
         'https://wa.me/51959199368?text=' +
@@ -194,6 +197,15 @@ export default function Welcome() {
                                         : 'Iniciar sesión en el consultorio'}
                                     <ArrowRight className="size-4" />
                                 </Link>
+                                {onlineBookingUrl && (
+                                    <Link
+                                        href={onlineBookingUrl}
+                                        className="inline-flex h-12 items-center gap-2 rounded-xl border border-[#0E8FA3]/35 bg-[#E6F5F7] px-5 text-sm font-semibold text-[#0A6577] shadow-xs transition hover:bg-[#D5EEF2]"
+                                    >
+                                        <CalendarCheck2 className="size-4 text-[#0E8FA3]" />
+                                        Reservar cita online
+                                    </Link>
+                                )}
                                 <a
                                     href={whatsappHref}
                                     target="_blank"

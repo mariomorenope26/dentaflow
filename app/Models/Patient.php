@@ -38,6 +38,9 @@ use Illuminate\Support\Str;
  * @property string|null $emergency_contact_name
  * @property string|null $emergency_contact_phone
  * @property array<int, string>|null $tags
+ * @property string $crm_stage
+ * @property Carbon|null $last_contacted_at
+ * @property string|null $crm_notes
  * @property string|null $notes
  * @property bool $is_active
  * @property int|null $created_by
@@ -77,6 +80,9 @@ class Patient extends Model
         'emergency_contact_name',
         'emergency_contact_phone',
         'tags',
+        'crm_stage',
+        'last_contacted_at',
+        'crm_notes',
         'notes',
         'is_active',
         'created_by',
@@ -102,6 +108,7 @@ class Patient extends Model
         return [
             'birth_date' => 'date',
             'tags' => 'array',
+            'last_contacted_at' => 'datetime',
             'is_active' => 'boolean',
         ];
     }

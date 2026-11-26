@@ -247,6 +247,26 @@ class UserManualCatalog
                     ['file' => '21-perfil-seguridad.jpg', 'caption' => 'Ajustes personales de cuenta, contraseña, autenticación 2FA y Passkeys biométricas.'],
                 ],
             ],
+            [
+                'id' => 'inteligencia-artificial-crm',
+                'number' => '13',
+                'title' => 'Inteligencia Artificial Clínica, Contralor IA, CRM y Reserva 24/7',
+                'category' => 'Inteligencia Artificial',
+                'roles' => ['Administrador', 'Odontólogo', 'Asistente (CRM)', 'Contador (Contralor/Reportes IA)'],
+                'summary' => 'Suite inteligente de nueva generación: Resumen Pre-Consulta IA, Copiloto SOAP por Voz, pre-evaluación de Rayos X IA, Reportes Conversacionales IA, auditoría automática Contralor IA, CRM WhatsApp y Reserva Online 24/7.',
+                'tip' => 'El motor IA funciona de forma integrada sin costo externo desde el primer día; adicionalmente puedes conectar tu clave opcional de Google Gemini u OpenAI desde Ajustes > Integraciones.',
+                'steps' => [
+                    'En la ficha del paciente pulsa Generar resumen IA para revisar riesgos ASA, hallazgos pendientes y saldo en segundos antes de atender.',
+                    'En Nueva atención usa Dictar voz o escribe texto libre y pulsa Estructurar SOAP para autocompletar Subjetivo, Objetivo, Evaluación, Plan y código CIE-10.',
+                    'En Contralor IA audita todo el consultorio (consentimientos faltantes, notas sin firmar, hallazgos sin presupuestar y laboratorio próximo) con puntuación de cumplimiento.',
+                    'En CRM y Retención clasifica pacientes por etapa del embudo, redacta mensajes WhatsApp personalizados con IA y comparte el enlace público /reservar-cita para citas online 24/7.',
+                ],
+                'screenshots' => [
+                    ['file' => '22-contralor-ia.jpg', 'caption' => 'Panel de Contralor IA con porcentaje de cumplimiento normativo, fuga de ingresos y brechas accionables.'],
+                    ['file' => '23-crm-retencion.jpg', 'caption' => 'CRM odontológico por etapas del embudo con generador de mensajes personalizados para WhatsApp.'],
+                    ['file' => '24-reserva-online.jpg', 'caption' => 'Portal público de Reserva de Citas Online 24/7 conectado en tiempo real con la disponibilidad de cada odontólogo.'],
+                ],
+            ],
         ];
     }
 
@@ -265,7 +285,9 @@ class UserManualCatalog
             ['module' => 'Catálogo de Tratamientos', 'admin' => 'CRUD Completo', 'dentist' => 'CRUD Completo', 'assistant' => 'Consulta', 'accountant' => 'Consulta'],
             ['module' => 'Laboratorio Dental y Autoclave / Kardex', 'admin' => 'Completo', 'dentist' => 'Completo', 'assistant' => 'Completo', 'accountant' => 'Sin acceso'],
             ['module' => 'Caja Diaria, Cierre Térmico, Cuotas y SUNAT UBL', 'admin' => 'Completo', 'dentist' => 'Solo vista ficha', 'assistant' => 'Cobros y Cierre', 'accountant' => 'Completo'],
-            ['module' => 'Reportes Financieros y Comisiones', 'admin' => 'Completo + CSV', 'dentist' => 'Completo + CSV', 'assistant' => 'Completo + CSV', 'accountant' => 'Completo + CSV'],
+            ['module' => 'Reportes Financieros, Reportes IA y Comisiones', 'admin' => 'Completo + CSV/IA', 'dentist' => 'Completo + CSV/IA', 'assistant' => 'Completo + CSV/IA', 'accountant' => 'Completo + CSV/IA'],
+            ['module' => 'Contralor IA (Auditoría Clínica/Financiera)', 'admin' => 'Completo', 'dentist' => 'Completo', 'assistant' => 'Sin acceso', 'accountant' => 'Lectura'],
+            ['module' => 'CRM Retención WhatsApp IA y Reserva Online 24/7', 'admin' => 'Completo', 'dentist' => 'Completo', 'assistant' => 'Completo', 'accountant' => 'Lectura / Campañas'],
             ['module' => 'Bitácora de Auditoría Normativa', 'admin' => 'Completo', 'dentist' => 'Sin acceso', 'assistant' => 'Sin acceso', 'accountant' => 'Lectura'],
             ['module' => 'Ajustes del Consultorio, Equipo y Respaldos', 'admin' => 'Exclusivo (Rol protegido)', 'dentist' => 'Sin acceso', 'assistant' => 'Sin acceso', 'accountant' => 'Sin acceso'],
         ];

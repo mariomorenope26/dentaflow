@@ -52,6 +52,7 @@ export type ClinicInfo = {
     settings: Record<string, unknown>;
     print_settings: PrintSettings;
     has_apiperu_token: boolean;
+    online_booking_enabled?: boolean;
     auto_lock_minutes: number;
 };
 

@@ -6,6 +6,7 @@ import {
     Ruler,
     Save,
     Scale,
+    Sparkles,
     Sun,
     Trash2,
 } from 'lucide-react';
@@ -64,8 +65,46 @@ export function RadiographViewerModal({
     const [contrast, setContrast] = useState(existing.filters?.contrast ?? 100);
     const [invert, setInvert] = useState(Boolean(existing.filters?.invert));
     const [saving, setSaving] = useState(false);
+    const [aiLoading, setAiLoading] = useState(false);
+    const [aiResult, setAiResult] = useState<{
+        summary: string;
+        disclaimer: string;
+        findings: {
+            label: string;
+            confidence: number;
+            detail: string;
+            x: number;
+            y: number;
+        }[];
+    } | null>(null);
 
     if (!image) return null;
+
+    const runAiAnalysis = async () => {
+        setAiLoading(true);
+        try {
+            const xsrf = decodeURIComponent(
+                document.cookie.match(/XSRF-TOKEN=([^;]+)/)?.[1] ?? '',
+            );
+            const res = await fetch(
+                `/patients/${patientId}/images/${image.id}/ai-analyze`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Accept: 'application/json',
+                        'X-XSRF-TOKEN': xsrf,
+                    },
+                },
+            );
+            const body = await res.json();
+            if (res.ok) {
+                setAiResult(body);
+            }
+        } finally {
+            setAiLoading(false);
+        }
+    };
 
     const handleCanvasClick = (e: React.MouseEvent<HTMLDivElement>) => {
         if (!canEdit || tool === 'none') return;
@@ -544,6 +583,73 @@ export function RadiographViewerModal({
                                         )}
                                     </div>
                                 ))}
+                            </div>
+                        )}
+
+                        {canEdit && (
+                            <div className="space-y-2 border-t border-slate-800 pt-3">
+                                <div className="flex items-center justify-between gap-2">
+                                    <span className="font-bold text-cyan-300">
+                                        Rayos X IA (Asistencia)
+                                    </span>
+                                    <Button
+                                        type="button"
+                                        size="sm"
+                                        disabled={aiLoading}
+                                        onClick={() => void runAiAnalysis()}
+                                        className="h-7 gap-1 bg-cyan-600 px-2.5 text-[11px] text-white hover:bg-cyan-500"
+                                    >
+                                        <Sparkles className="size-3" />
+                                        {aiLoading
+                                            ? 'Analizando...'
+                                            : 'Analizar IA'}
+                                    </Button>
+                                </div>
+                                {aiResult && (
+                                    <div className="space-y-1.5 rounded-lg border border-cyan-900 bg-slate-950/90 p-2 text-[11px]">
+                                        <p className="text-slate-200">
+                                            {aiResult.summary}
+                                        </p>
+                                        {aiResult.findings.map((f, idx) => (
+                                            <div
+                                                key={idx}
+                                                className="flex items-center justify-between gap-2 rounded bg-slate-900 px-2 py-1"
+                                            >
+                                                <div>
+                                                    <div className="font-semibold text-amber-300">
+                                                        {f.label} (
+                                                        {f.confidence}
+                                                        %)
+                                                    </div>
+                                                    <div className="text-[10px] text-slate-400">
+                                                        {f.detail}
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        setPins((prev) => [
+                                                            ...prev,
+                                                            {
+                                                                id: `${Date.now()}-${idx}`,
+                                                                x: f.x,
+                                                                y: f.y,
+                                                                label: f.label,
+                                                                color: '#F59E0B',
+                                                            },
+                                                        ])
+                                                    }
+                                                    className="shrink-0 rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-300 hover:bg-amber-500/30"
+                                                >
+                                                    + Pin
+                                                </button>
+                                            </div>
+                                        ))}
+                                        <p className="text-[10px] text-slate-500 italic">
+                                            {aiResult.disclaimer}
+                                        </p>
+                                    </div>
+                                )}
                             </div>
                         )}
 

@@ -26,6 +26,9 @@ use Illuminate\Support\Facades\Storage;
  * @property array<int, string>|null $chairs
  * @property array<string, mixed>|null $settings
  * @property string|null $apiperu_token
+ * @property string $ai_provider
+ * @property string|null $ai_api_key
+ * @property bool $online_booking_enabled
  * @property array<string, mixed>|null $print_settings
  * @property bool $is_active
  * @property Carbon|null $created_at
@@ -51,12 +54,15 @@ class Clinic extends Model
         'chairs',
         'settings',
         'apiperu_token',
+        'ai_provider',
+        'ai_api_key',
+        'online_booking_enabled',
         'print_settings',
         'is_active',
     ];
 
     /** @var list<string> */
-    protected $hidden = ['apiperu_token'];
+    protected $hidden = ['apiperu_token', 'ai_api_key'];
 
     /**
      * @return array<string, string>
@@ -67,6 +73,8 @@ class Clinic extends Model
             'chairs' => 'array',
             'settings' => 'array',
             'apiperu_token' => 'encrypted',
+            'ai_api_key' => 'encrypted',
+            'online_booking_enabled' => 'boolean',
             'print_settings' => 'array',
             'is_active' => 'boolean',
         ];

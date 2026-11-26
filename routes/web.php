@@ -6,7 +6,10 @@ use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\ClinicalDocumentController;
 use App\Http\Controllers\ClinicalEvolutionController;
 use App\Http\Controllers\ClinicSettingsController;
+use App\Http\Controllers\ContralorController;
+use App\Http\Controllers\CrmController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DentalAiController;
 use App\Http\Controllers\DniLookupController;
 use App\Http\Controllers\GlobalSearchController;
 use App\Http\Controllers\LabOrderController;
@@ -21,6 +24,7 @@ use App\Http\Controllers\PaymentInstallmentController;
 use App\Http\Controllers\PdfExportController;
 use App\Http\Controllers\PeriodontogramController;
 use App\Http\Controllers\PublicAppointmentController;
+use App\Http\Controllers\PublicBookingController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RucLookupController;
 use App\Http\Controllers\SterilizationInventoryController;
@@ -31,6 +35,13 @@ use App\Http\Controllers\UserManualController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
+Route::get('reservar-cita', [PublicBookingController::class, 'show'])->name('public.booking.show');
+Route::get('reservar-cita/disponibilidad', [PublicBookingController::class, 'slots'])
+    ->middleware('throttle:60,1')
+    ->name('public.booking.slots');
+Route::post('reservar-cita', [PublicBookingController::class, 'store'])
+    ->middleware('throttle:15,1')
+    ->name('public.booking.store');
 Route::get('confirmar-cita/{token}', [PublicAppointmentController::class, 'show'])->name('public.appointment.show');
 Route::post('confirmar-cita/{token}', [PublicAppointmentController::class, 'respond'])
     ->middleware('throttle:20,1')
@@ -177,9 +188,31 @@ Route::middleware(['auth', 'verified', 'clinic'])->group(function (): void {
     Route::patch('treatments/{treatment}', [TreatmentCatalogController::class, 'update'])->name('treatments.update');
     Route::delete('treatments/{treatment}', [TreatmentCatalogController::class, 'destroy'])->name('treatments.destroy');
 
-    // Reportes clínicos y financieros
+    // Asistencia Clínica con Inteligencia Artificial (Dentalink / Doctocliq style)
+    Route::post('patients/{patient}/ai-clinical-summary', [DentalAiController::class, 'patientSummary'])
+        ->middleware('throttle:30,1')
+        ->name('patients.ai-summary');
+    Route::post('patients/{patient}/ai-parse-soap', [DentalAiController::class, 'parseSoap'])
+        ->middleware('throttle:30,1')
+        ->name('patients.ai-soap');
+    Route::post('patients/{patient}/images/{image}/ai-analyze', [DentalAiController::class, 'analyzeRadiograph'])
+        ->middleware('throttle:20,1')
+        ->name('patients.images.ai-analyze');
+
+    // Reportes clínicos y financieros + Analítica Conversacional IA
     Route::get('reportes', [ReportController::class, 'index'])->name('reports.index');
     Route::get('reportes/export-csv', [ReportController::class, 'exportCsv'])->name('reports.export-csv');
+    Route::post('reportes/ai-ask', [DentalAiController::class, 'askReports'])
+        ->middleware('throttle:30,1')
+        ->name('reports.ai-ask');
+
+    // Contralor IA y CRM de retención WhatsApp
+    Route::get('contralor-ia', [ContralorController::class, 'index'])->name('contralor.index');
+    Route::get('crm', [CrmController::class, 'index'])->name('crm.index');
+    Route::patch('crm/patients/{patient}', [CrmController::class, 'updatePatientStage'])->name('crm.patients.update');
+    Route::post('crm/patients/{patient}/whatsapp-draft', [CrmController::class, 'draftWhatsapp'])
+        ->middleware('throttle:30,1')
+        ->name('crm.whatsapp-draft');
 
     // Manual de usuario en línea y PDF oficial (solo personal autenticado)
     Route::get('manual', [UserManualController::class, 'index'])->name('manual.index');

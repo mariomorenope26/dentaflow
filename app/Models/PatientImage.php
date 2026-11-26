@@ -21,6 +21,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon $taken_at
  * @property string|null $notes
  * @property array<string, mixed>|null $annotations
+ * @property array<string, mixed>|null $ai_analysis
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
@@ -40,6 +41,7 @@ class PatientImage extends Model
         'taken_at',
         'notes',
         'annotations',
+        'ai_analysis',
     ];
 
     /** @var list<string> */
@@ -53,6 +55,7 @@ class PatientImage extends Model
         return [
             'taken_at' => 'date',
             'annotations' => 'array',
+            'ai_analysis' => 'array',
         ];
     }
 

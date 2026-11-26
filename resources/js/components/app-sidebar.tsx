@@ -2,10 +2,12 @@ import { Link, usePage } from '@inertiajs/react';
 import {
     BarChart3,
     BookOpen,
+    Bot,
     CalendarDays,
     ClipboardList,
     FileSpreadsheet,
     FlaskConical,
+    HeartHandshake,
     LayoutGrid,
     Settings,
     ShieldCheck,
@@ -71,11 +73,29 @@ export function AppSidebar() {
                   },
               ]
             : []),
+        ...(can?.manage_patients || can?.manage_cash
+            ? [
+                  {
+                      title: 'CRM y Retención',
+                      href: '/crm',
+                      icon: HeartHandshake,
+                  },
+              ]
+            : []),
         {
             title: 'Reportes',
             href: '/reportes',
             icon: BarChart3,
         },
+        ...(can?.edit_clinical || can?.manage_clinic || can?.view_audit
+            ? [
+                  {
+                      title: 'Contralor IA',
+                      href: '/contralor-ia',
+                      icon: Bot,
+                  },
+              ]
+            : []),
         ...(can?.view_audit
             ? [
                   {

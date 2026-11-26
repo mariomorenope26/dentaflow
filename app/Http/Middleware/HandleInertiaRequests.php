@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Models\Clinic;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -71,6 +72,7 @@ class HandleInertiaRequests extends Middleware
                     'settings' => $clinicModel->settings ?? [],
                     'print_settings' => $clinicModel->resolvedPrintSettings(),
                     'has_apiperu_token' => ! empty($clinicModel->apiperu_token),
+                    'online_booking_enabled' => $clinicModel->online_booking_enabled,
                     'auto_lock_minutes' => $clinicModel->autoLockMinutes(),
                 ];
             }
@@ -79,6 +81,9 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'name' => config('app.name'),
+            'onlineBookingUrl' => fn (): ?string => Clinic::current()?->online_booking_enabled
+                ? route('public.booking.show')
+                : null,
             'auth' => [
                 'user' => $userPayload,
                 'clinic' => $clinic,

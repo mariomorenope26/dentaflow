@@ -3,6 +3,7 @@ import {
     BarChart3,
     CalendarX,
     FileSpreadsheet,
+    Sparkles,
     TrendingUp,
     Users,
     Wallet,
@@ -63,6 +64,42 @@ export default function ReportsIndex({
     const currency = auth.clinic?.currency_symbol ?? 'S/';
     const [startDate, setStartDate] = useState(filters.start_date);
     const [endDate, setEndDate] = useState(filters.end_date);
+    const [aiQuestion, setAiQuestion] = useState('');
+    const [aiLoading, setAiLoading] = useState(false);
+    const [aiAnswer, setAiAnswer] = useState<{
+        answer: string;
+        highlights: string[];
+        provider: string;
+    } | null>(null);
+
+    const askAi = async (customPrompt?: string) => {
+        const q = (customPrompt ?? aiQuestion).trim();
+        if (q.length < 3) return;
+        if (customPrompt) setAiQuestion(customPrompt);
+        setAiLoading(true);
+        try {
+            const xsrf = decodeURIComponent(
+                document.cookie.match(/XSRF-TOKEN=([^;]+)/)?.[1] ?? '',
+            );
+            const res = await fetch('/reportes/ai-ask', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                    'X-XSRF-TOKEN': xsrf,
+                },
+                body: JSON.stringify({
+                    question: q,
+                    start_date: startDate,
+                    end_date: endDate,
+                }),
+            });
+            const body = await res.json();
+            if (res.ok) setAiAnswer(body);
+        } finally {
+            setAiLoading(false);
+        }
+    };
 
     const applyFilter = (e: React.FormEvent) => {
         e.preventDefault();
@@ -129,6 +166,71 @@ export default function ReportsIndex({
                         Actualizar reporte
                     </Button>
                 </form>
+
+                <div className="rounded-2xl border border-[#0E8FA3]/30 bg-gradient-to-r from-[#F0FAFC] to-white p-4 shadow-xs dark:from-cyan-950/30 dark:to-card">
+                    <div className="mb-2 flex items-center gap-2">
+                        <Sparkles className="size-4 text-[#0E8FA3]" />
+                        <span className="text-sm font-bold">
+                            Analítica Conversacional IA (Reportes IA)
+                        </span>
+                    </div>
+                    <form
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            void askAi();
+                        }}
+                        className="flex flex-wrap gap-2"
+                    >
+                        <Input
+                            value={aiQuestion}
+                            onChange={(e) => setAiQuestion(e.target.value)}
+                            placeholder="Pregunta sobre ingresos, medios de pago, morosidad, comisiones o inasistencias..."
+                            className="min-w-[260px] flex-1 bg-background text-sm"
+                        />
+                        <Button
+                            type="submit"
+                            disabled={aiLoading}
+                            className="gap-1.5 bg-[#0E8FA3] text-white hover:bg-[#0A6577]"
+                        >
+                            <Sparkles className="size-4" />
+                            {aiLoading ? 'Analizando...' : 'Preguntar a IA'}
+                        </Button>
+                    </form>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                        {[
+                            '¿Cuánto recaudamos y cuál fue el medio de pago líder?',
+                            '¿Qué pacientes tienen deuda por cobrar?',
+                            '¿Cuál es la tasa de inasistencia?',
+                            '¿Cuánto corresponde de comisión a cada odontólogo?',
+                        ].map((prompt) => (
+                            <button
+                                key={prompt}
+                                type="button"
+                                onClick={() => void askAi(prompt)}
+                                className="rounded-full border bg-background px-2.5 py-1 text-[11px] font-medium text-muted-foreground hover:border-[#0E8FA3] hover:text-[#0A6577]"
+                            >
+                                {prompt}
+                            </button>
+                        ))}
+                    </div>
+                    {aiAnswer && (
+                        <div className="mt-3 rounded-xl border bg-background p-3.5 text-sm">
+                            <p className="font-medium text-foreground">
+                                {aiAnswer.answer}
+                            </p>
+                            <div className="mt-2 flex flex-wrap gap-2">
+                                {aiAnswer.highlights.map((h) => (
+                                    <span
+                                        key={h}
+                                        className="rounded-lg bg-[#E6F5F7] px-2.5 py-1 text-xs font-semibold text-[#0A6577]"
+                                    >
+                                        {h}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
 
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <div className="rounded-2xl border bg-card p-4 shadow-xs">
