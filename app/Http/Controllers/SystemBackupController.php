@@ -60,18 +60,26 @@ class SystemBackupController extends Controller
         $username = (string) ($conn['username'] ?? 'root');
         $password = (string) ($conn['password'] ?? '');
 
-        $result = Process::env(['MYSQL_PWD' => $password])
-            ->timeout(30)
-            ->run([
-                'mysqldump',
-                "--host={$host}",
-                "--port={$port}",
-                "--user={$username}",
-                '--single-transaction',
-                '--routines',
-                '--triggers',
-                $database,
-            ]);
+        if (! function_exists('proc_open')) {
+            return back()->with('error', 'El servidor tiene deshabilitada la ejecución de comandos del sistema (proc_open). Descarga el respaldo JSON portable, que funciona 100% en PHP sin procesos externos.');
+        }
+
+        try {
+            $result = Process::env(['MYSQL_PWD' => $password])
+                ->timeout(30)
+                ->run([
+                    'mysqldump',
+                    "--host={$host}",
+                    "--port={$port}",
+                    "--user={$username}",
+                    '--single-transaction',
+                    '--routines',
+                    '--triggers',
+                    $database,
+                ]);
+        } catch (Throwable) {
+            return back()->with('error', 'No se pudo iniciar mysqldump en este servidor. Usa el respaldo JSON portable.');
+        }
 
         if (! $result->successful()) {
             return back()->with('error', 'No se pudo ejecutar mysqldump: '.$result->errorOutput());

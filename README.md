@@ -12,9 +12,9 @@ Sistema web profesional para la gestión integral de **consultorio odontológico
 - **Caja Térmica, SUNAT y Financiamiento:** cierre de caja y tickets térmicos 80/58 mm por medios de pago, comprobantes electrónicos XML UBL 2.1 con QR, consulta RENIEC DNI y SUNAT RUC vía `apiperu.dev`, plan de cuotas y liquidación de honorarios.
 - **Respaldo y Seguridad:** copias de seguridad portables JSON firmadas (HMAC-SHA256), exportación MySQL, protección inmutable del rol **Administrador del consultorio**, bloqueo automático por inactividad y registro completo de auditoría.
 
-## Requisitos de servidor (Producción)
+## Requisitos de servidor (Producción · BanaHosting / cPanel PHP 8.3+)
 
-- **PHP >= 8.3** (`pdo`, `pdo_mysql` o `pdo_sqlite`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`, `json`, `bcmath`, `fileinfo`, `gd`, `curl`, `zip`)
+- **PHP 8.3 – 8.5** (paquete `composer.lock` y `vendor/` compilados con plataforma mínima **PHP 8.3.0**; en BanaHosting cPanel seleccionar **PHP 8.3** en _Select PHP Version_ con `pdo`, `pdo_mysql`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`, `json`, `bcmath`, `fileinfo`, `gd`, `curl`, `zip`)
 - **MySQL 8.0+ / MariaDB 10.6+** o **SQLite 3**
 - HTTPS recomendado en producción (WebAuthn / Passkeys y PWA requieren contexto seguro)
 

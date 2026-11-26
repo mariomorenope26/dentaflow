@@ -70,18 +70,21 @@ cp "${ROOT_DIR}/installer/install.php" "${STAGE_DIR}/public/install.php"
 cp "${ROOT_DIR}/installer/install.php" "${STAGE_DIR}/install.php"
 
 cat <<'EOF' > "${STAGE_DIR}/INSTALACION-RAPIDA.txt"
-DentaFlow - Guía Rápida de Instalación en Servidor PHP
-=====================================================
+DentaFlow - Guía Rápida de Instalación en Servidor PHP (BanaHosting / cPanel PHP 8.3+)
+=====================================================================================
 
-Requisitos: PHP 8.3+, MySQL/MariaDB o SQLite, extensiones pdo, mbstring, openssl, gd, zip, curl, fileinfo.
+Requisitos: PHP 8.3+ (recomendado PHP 8.3 en cPanel -> Select PHP Version), MySQL/MariaDB o SQLite,
+extensiones pdo, pdo_mysql, mbstring, openssl, tokenizer, xml, ctype, json, bcmath, gd, zip, curl, fileinfo.
+Las dependencias vendor/ de este paquete están compiladas para PHP 8.3+.
 
 Pasos:
-1. Sube y descomprime este archivo ZIP en tu servidor o hosting.
-2. Configura el DocumentRoot / directorio raíz web apuntando a la carpeta `public/` (recomendado por seguridad).
-3. Verifica permisos de escritura en `.env` (o carpeta raíz), `storage/`, `bootstrap/cache/` y `database/`.
-4. Abre en tu navegador: https://tu-dominio.com/install.php
-5. Completa los 3 pasos del asistente (requisitos, base de datos, datos del consultorio y administrador).
-6. Al finalizar, pulsa el botón para eliminar `install.php` automáticamente.
+1. En BanaHosting / cPanel, entra a "Select PHP Version", elige PHP 8.3 y verifica las extensiones.
+2. Sube y descomprime este archivo ZIP en tu hosting (por ejemplo en ~/dentaflow o una subcarpeta).
+3. Configura el DocumentRoot de tu dominio o subdominio apuntando a la carpeta `public/` (recomendado por seguridad).
+4. En cPanel -> "Bases de datos MySQL", crea una base de datos y usuario con todos los privilegios (usa host `localhost` y deja desmarcada la casilla de crear BD automática).
+5. Verifica permisos de escritura en la raíz (para `.env`), `storage/` y `bootstrap/cache/`.
+6. Abre en tu navegador: https://tu-dominio.com/install.php
+7. Completa el asistente y, al finalizar, pulsa el botón para eliminar `install.php` automáticamente.
 
 Soporte Técnico: Grupo JMSPERU 2026 :: WhatsApp +51 959199368
 EOF

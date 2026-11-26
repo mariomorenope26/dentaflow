@@ -426,7 +426,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                         try {
                             $kernel->call('storage:link', ['--force' => true]);
                         } catch (Throwable) {
-                            @symlink($targetStorage, $publicStorage);
+                            if (function_exists('symlink')) {
+                                @symlink($targetStorage, $publicStorage);
+                            }
                         }
                     }
 
@@ -564,12 +566,12 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         <?php if ($step === 1) { ?>
             <div class="card">
                 <h2>Verificación del entorno del servidor</h2>
-                <p class="sub">Comprobamos que tu hosting o VPS cumpla las extensiones de PHP y permisos requeridos.</p>
+                <p class="sub">Comprobamos que tu hosting (por ejemplo BanaHosting cPanel con PHP 8.3) o VPS cumpla las extensiones de PHP y permisos requeridos.</p>
 
                 <div class="section-title">Versión de PHP y extensiones</div>
                 <div class="check-grid">
                     <div class="check-item">
-                        <span>PHP &gt;= 8.3 (Actual: <?php echo htmlspecialchars(PHP_VERSION, ENT_QUOTES, 'UTF-8'); ?>)</span>
+                        <span>PHP &gt;= 8.3 · Recomendado 8.3–8.5 (Actual: <?php echo htmlspecialchars(PHP_VERSION, ENT_QUOTES, 'UTF-8'); ?>)</span>
                         <span class="<?php echo $reqs['php_ok'] ? 'ok' : 'fail'; ?>"><?php echo $reqs['php_ok'] ? 'OK' : 'Requerido'; ?></span>
                     </div>
                     <?php foreach ($reqs['extensions'] as $name => $passed) { ?>
@@ -640,7 +642,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 
                 <div id="mysql-fields" class="grid-2" style="margin-top:12px;">
                     <div>
-                        <label>Servidor (Host)</label>
+                        <label>Servidor (Host) <small style="color:#5F6F7C;font-weight:400;">(BanaHosting/cPanel: suele ser <code>localhost</code>)</small></label>
                         <input type="text" name="db_host" value="<?php echo htmlspecialchars($form['db_host'], ENT_QUOTES, 'UTF-8'); ?>">
                     </div>
                     <div>
