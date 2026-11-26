@@ -38,7 +38,7 @@ class UserManualController extends Controller
             'chapters' => $chapters,
             'roleMatrix' => UserManualCatalog::roleMatrix(),
             'clinicName' => $clinic !== null ? $clinic->name : 'Consultorio Odontológico',
-            'manualVersion' => 'v1.0 · Edición Homologada HCE',
+            'manualVersion' => 'v1.2 · Edición IA Clínica & Homologación HCE',
             'pdfUrl' => route('manual.pdf'),
         ]);
     }
@@ -84,7 +84,7 @@ class UserManualController extends Controller
             'roleMatrix' => UserManualCatalog::roleMatrix(),
             'generatedBy' => $user->name,
             'generatedAt' => now(),
-            'manualVersion' => 'v1.0 · Homologación HCE Internacional',
+            'manualVersion' => 'v1.2 · Homologación HCE & Suite IA',
         ])->setPaper('a4', 'portrait');
 
         return $pdf->stream('Manual-Usuario-DentaFlow.pdf');

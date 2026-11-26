@@ -25,6 +25,7 @@ use App\Models\TreatmentPlan;
 use App\Models\TreatmentPlanItem;
 use App\Models\User;
 use App\Services\ClinicProvisioner;
+use App\Services\UserManualCatalog;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
@@ -1065,10 +1066,36 @@ test('manual oficial en linea y descarga pdf requieren sesion iniciada e incluye
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->component('manual/index')
-            ->has('chapters', 13)
+            ->has('chapters', 15)
             ->has('roleMatrix', 12)
             ->where('pdfUrl', route('manual.pdf')),
         );
+
+    foreach (UserManualCatalog::chapters() as $chapter) {
+        expect($chapter['screenshots'])->not->toBeEmpty();
+        foreach ($chapter['screenshots'] as $shot) {
+            expect(is_file(public_path('images/manual/'.$shot['file'])))->toBeTrue();
+        }
+    }
+
+    $manualHtml = view('pdf.user-manual', [
+        'clinic' => $clinic,
+        'logoDataUri' => null,
+        'chapters' => UserManualCatalog::chapters(),
+        'roleMatrix' => UserManualCatalog::roleMatrix(),
+        'generatedBy' => $dentist->name,
+        'generatedAt' => now(),
+        'manualVersion' => 'v1.2 · Homologación HCE & Suite IA',
+    ])->render();
+
+    expect($manualHtml)
+        ->toContain('Copiloto SOAP por Voz')
+        ->toContain('Contralor IA')
+        ->toContain('CRM Odontológico WhatsApp IA')
+        ->toContain('Reserva Online 24/7')
+        ->toContain('Reportes IA')
+        ->toContain('Rayos X IA')
+        ->toContain('PHP 8.3');
 
     $pdf = $this->get('/manual/pdf')->assertOk();
     expect(substr((string) $pdf->getContent(), 0, 5))->toBe('%PDF-');

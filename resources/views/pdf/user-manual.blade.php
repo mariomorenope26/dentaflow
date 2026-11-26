@@ -250,11 +250,11 @@
         <div class="cover-badge">{{ $manualVersion }}</div>
         <h1>Manual Oficial de Usuario y Operación Clínica</h1>
         <p>
-            Guía completa ilustrada con capturas reales del sistema para el manejo clínico, administrativo, tributario y de bioseguridad en consultorio odontológico único.
+            Guía completa ilustrada con capturas reales del sistema para el manejo clínico homologado, Copiloto Clínico IA (Pre-Consulta, SOAP por Voz, Rayos X IA y Reportes IA), Contralor IA, CRM WhatsApp, Reserva Online 24/7, facturación SUNAT UBL 2.1 y bioseguridad en consultorio odontológico único.
         </p>
 
         <div class="std-bar">
-            HOMOLOGACIÓN: HL7 FHIR R4 · ISO/EN 13606 HCE · ISO 3950 (FDI) · CIE-10 OMS · SUNAT UBL 2.1 · LEY N.º 29733
+            HOMOLOGACIÓN: HL7 FHIR R4 · ISO/EN 13606 HCE · ISO 3950 (FDI) · CIE-10 OMS · SUNAT UBL 2.1 · LEY N.º 29733 · SUITE IA &amp; RESERVA 24/7
         </div>
     </div>
 
@@ -269,7 +269,7 @@
         </tr>
         <tr>
             <th>Alcance del Manual</th>
-            <td>{{ count($chapters) }} capítulos operativos · Capturas reales de cada módulo clínico y administrativo</td>
+            <td>{{ count($chapters) }} capítulos operativos · Incluye Copiloto IA, Contralor IA, CRM WhatsApp y Reserva Online 24/7 · Capturas reales</td>
         </tr>
         <tr>
             <th>Generado por</th>

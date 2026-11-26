@@ -153,10 +153,12 @@ export default function UserManual({
                                 <strong>
                                     {totalScreenshots} capturas reales
                                 </strong>{' '}
-                                de la plataforma, flujos de historia clínica
-                                homologada HL7 FHIR R4, odontograma, caja
-                                térmica, SUNAT UBL 2.1, bioseguridad y matriz de
-                                permisos por rol.
+                                de la plataforma: historia clínica homologada
+                                HL7 FHIR R4, odontograma, visor radiográfico
+                                medible con Rayos X IA, Copiloto SOAP por voz,
+                                Resumen Pre-Consulta IA, Contralor IA, CRM
+                                WhatsApp, Reserva Online 24/7, Reportes IA, caja
+                                térmica y SUNAT UBL 2.1.
                             </p>
 
                             <div className="flex flex-wrap gap-3 pt-1 text-xs text-cyan-100/90">
@@ -205,7 +207,7 @@ export default function UserManual({
                                 type="search"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                placeholder="Buscar procedimiento, módulo, permiso o palabra clave (ej: odontograma, SUNAT, DNI, autoclave)..."
+                                placeholder="Buscar módulo, función IA o palabra clave (ej: Contralor IA, CRM, SOAP voz, Rayos X IA, Reserva 24/7, SUNAT, DNI)..."
                                 className="pl-9"
                             />
                         </div>

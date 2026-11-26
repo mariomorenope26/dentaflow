@@ -427,8 +427,8 @@ export default function ClinicSettings({
                     </h1>
                     <p className="text-sm text-muted-foreground">
                         Configura la identidad y logotipo, impresiones y
-                        tickets, integración RENIEC (apiperu.dev), equipo y
-                        copias de seguridad
+                        tickets, integración RENIEC (apiperu.dev), motor de IA,
+                        reserva online 24/7, equipo y copias de seguridad
                     </p>
                 </div>
 
@@ -438,11 +438,7 @@ export default function ClinicSettings({
                         [
                             ['consultorio', 'Consultorio y Logo', Building2],
                             ['impresiones', 'Impresiones y Formatos', Printer],
-                            [
-                                'integraciones',
-                                'Búsqueda DNI (apiperu.dev)',
-                                KeyRound,
-                            ],
+                            ['integraciones', 'RENIEC, IA y Reserva', KeyRound],
                             ['equipo', 'Equipo y Roles', Users],
                             ['respaldo', 'Respaldo y Reinicio', Database],
                         ] as const
