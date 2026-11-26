@@ -78,12 +78,14 @@ extensiones pdo, pdo_mysql, mbstring, openssl, tokenizer, xml, ctype, json, bcma
 Las dependencias vendor/ de este paquete están compiladas para PHP 8.3+.
 
 Pasos:
-1. En BanaHosting / cPanel, entra a "Select PHP Version", elige PHP 8.3 y verifica las extensiones.
-2. Sube y descomprime este archivo ZIP en tu hosting (por ejemplo en ~/dentaflow o una subcarpeta).
+1. En BanaHosting / cPanel:
+   - Entra a "MultiPHP Manager", marca tu dominio/subdominio y asegúrate de asignarle PHP 8.3 (ea-php83 / alt-php83).
+   - Entra a "Select PHP Version", selecciona PHP 8.3 y verifica que las extensiones listadas estén habilitadas.
+2. Sube y descomprime este archivo ZIP en tu hosting (por ejemplo en ~/dentaflow o la carpeta del subdominio).
 3. Configura el DocumentRoot de tu dominio o subdominio apuntando a la carpeta `public/` (recomendado por seguridad).
 4. En cPanel -> "Bases de datos MySQL", crea una base de datos y usuario con todos los privilegios (usa host `localhost` y deja desmarcada la casilla de crear BD automática).
 5. Verifica permisos de escritura en la raíz (para `.env`), `storage/` y `bootstrap/cache/`.
-6. Abre en tu navegador: https://tu-dominio.com/install.php
+6. Abre en tu navegador: https://tu-dominio.com/ (redirigirá automáticamente a `/install.php`).
 7. Completa el asistente y, al finalizar, pulsa el botón para eliminar `install.php` automáticamente.
 
 Soporte Técnico: Grupo JMSPERU 2026 :: WhatsApp +51 959199368

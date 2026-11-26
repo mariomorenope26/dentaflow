@@ -14,7 +14,7 @@ Sistema web profesional para la gestión integral de **consultorio odontológico
 
 ## Requisitos de servidor (Producción · BanaHosting / cPanel PHP 8.3+)
 
-- **PHP 8.3 – 8.5** (paquete `composer.lock` y `vendor/` compilados con plataforma mínima **PHP 8.3.0**; en BanaHosting cPanel seleccionar **PHP 8.3** en _Select PHP Version_ con `pdo`, `pdo_mysql`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`, `json`, `bcmath`, `fileinfo`, `gd`, `curl`, `zip`)
+- **PHP 8.3 – 8.5** (paquete `composer.lock` y `vendor/` compilados con plataforma mínima **PHP 8.3.0**; en BanaHosting cPanel asignar **PHP 8.3** en **MultiPHP Manager** para el dominio/subdominio y confirmar extensiones en _Select PHP Version_: `pdo`, `pdo_mysql`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`, `json`, `bcmath`, `fileinfo`, `gd`, `curl`, `zip`)
 - **MySQL 8.0+ / MariaDB 10.6+** o **SQLite 3**
 - HTTPS recomendado en producción (WebAuthn / Passkeys y PWA requieren contexto seguro)
 
@@ -25,7 +25,7 @@ Sistema web profesional para la gestión integral de **consultorio odontológico
     bash scripts/package-installer.sh v1.0
     ```
 2. Descomprime el ZIP en el servidor y apunta el `DocumentRoot` a `public/`.
-3. Ingresa desde el navegador a `https://tu-dominio.com/install.php`.
+3. Ingresa desde el navegador a `https://tu-dominio.com/` (si aún no está instalado, redirigirá automáticamente a `/install.php`).
 4. Sigue el asistente guiado (verificación de requisitos, base de datos, datos del consultorio y creación del Administrador principal).
 5. Al concluir, elimina `install.php` desde el botón integrado de limpieza.
 

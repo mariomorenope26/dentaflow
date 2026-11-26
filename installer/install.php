@@ -38,7 +38,13 @@ $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
 $detectedUrl = $scheme.'://'.$host;
 
 if (session_status() !== PHP_SESSION_ACTIVE) {
-    session_start();
+    if (! @session_start()) {
+        $fallbackSessionDir = is_writable($basePath.'/storage/framework/sessions')
+            ? $basePath.'/storage/framework/sessions'
+            : sys_get_temp_dir();
+        @ini_set('session.save_path', $fallbackSessionDir);
+        @session_start();
+    }
 }
 if (empty($_SESSION['installer_csrf']) || ! is_string($_SESSION['installer_csrf'])) {
     $_SESSION['installer_csrf'] = bin2hex(random_bytes(32));
@@ -231,7 +237,11 @@ $form = [
     'odontogram_notation' => (string) ($_POST['odontogram_notation'] ?? 'FDI'),
     'admin_name' => trim((string) ($_POST['admin_name'] ?? '')),
     'admin_license' => trim((string) ($_POST['admin_license'] ?? '')),
-    'admin_email' => mb_strtolower(trim((string) ($_POST['admin_email'] ?? ''))),
+    'admin_email' => (static function (string $email): string {
+        $trimmed = trim($email);
+
+        return function_exists('mb_strtolower') ? mb_strtolower($trimmed) : strtolower($trimmed);
+    })((string) ($_POST['admin_email'] ?? '')),
     'admin_password' => (string) ($_POST['admin_password'] ?? ''),
     'admin_password_confirmation' => (string) ($_POST['admin_password_confirmation'] ?? ''),
 ];
@@ -567,6 +577,21 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             <div class="card">
                 <h2>Verificación del entorno del servidor</h2>
                 <p class="sub">Comprobamos que tu hosting (por ejemplo BanaHosting cPanel con PHP 8.3) o VPS cumpla las extensiones de PHP y permisos requeridos.</p>
+
+                <?php if (! $reqs['php_ok']) { ?>
+                    <div class="alert-error">
+                        <strong>Tu dominio o subdominio está ejecutando PHP <?php echo htmlspecialchars(PHP_VERSION, ENT_QUOTES, 'UTF-8'); ?> (se requiere PHP 8.3 o superior).</strong>
+                        <div style="margin-top:6px;">
+                            En <strong>BanaHosting / cPanel</strong>, aunque hayas cambiado <em>"Select PHP Version"</em>, los subdominios pueden seguir apuntando a PHP 8.1:
+                            <ol style="margin:6px 0 0 18px;padding:0;">
+                                <li>Ingresa a <strong>cPanel &rarr; MultiPHP Manager</strong>.</li>
+                                <li>Marca tu dominio o subdominio y elige <strong>PHP 8.3 (ea-php83 / alt-php83)</strong>, luego pulsa <strong>Aplicar</strong>.</li>
+                                <li>En <strong>cPanel &rarr; Select PHP Version</strong>, confirma que estén habilitadas las extensiones listadas abajo.</li>
+                                <li>Recarga esta página para continuar.</li>
+                            </ol>
+                        </div>
+                    </div>
+                <?php } ?>
 
                 <div class="section-title">Versión de PHP y extensiones</div>
                 <div class="check-grid">
